@@ -2,12 +2,19 @@
 setwd("~/PostDoc_Thunen/ASE-stuff/")
 ## load libraries
 library(tidyverse)
+library(sf)
 
 
 # bird data
 bird <- read.csv("data/birddata/mhb_bird.csv")
 bird_group <- read.csv("data/birddata/bird_fallow_group.csv")
 names(bird)[1] <- "routcode"
+
+# location of CBBS transects
+mhb_xy <- st_read("data/geodata/MhB_plots_S2637.shp")
+mhb_xy <-st_drop_geometry(mhb_xy)[,c("ROUTCODE","X_COORD", "Y_COORD")]
+names(mhb_xy)[1] <- tolower(names(mhb_xy)[1])
+
 # compute the abundance per groups, [add weighing max abu]
 bird %>%
   filter(! Artname %in% c("Rotmilan", "Rauchschwalbe")) %>% # remove red kite and barn swallow
@@ -117,6 +124,7 @@ intensity <- read.csv("data/landusedata/mhb_intensity_atkis.csv")
 bird_dd %>%
   rename(year = Jahr) %>%
   filter(year %in% c(2007, 2010, 2016)) %>%
+  left_join(mhb_xy, by = "routcode") %>%
   left_join(intensity, by = "routcode") %>%
   left_join(edge[,-1], by = "routcode") %>%
   left_join(atkis_dd2, by = "routcode") %>%
