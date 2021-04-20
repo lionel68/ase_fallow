@@ -46,8 +46,8 @@ m_edge <- brm(bf(edge ~ year_cat + edge_std * fallow_std + (1 | bkr)),
                 data = bird, prior = bprior,
                 family = "zero_inflated_negbinomial")
 
-m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + (1 | bkr)),
-               data = bird, prior = bprior,
+m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + gp(X_COORD, Y_COORD, k = 10, c = 5/4)),
+               data = bird, control = list(adapt_delta = 0.9),
                family = "zero_inflated_negbinomial")
 
 m_low <- brm(bf(low ~ year_cat + edge_std * fallow_std + (1 | bkr)),

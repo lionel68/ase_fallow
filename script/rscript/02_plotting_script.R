@@ -258,6 +258,17 @@ f2007 <- seq(min(ff$y2007,na.rm=TRUE), max(ff$y2007,na.rm=TRUE), length.out = 20
 d2010 <- predict(mf, newdata = data.frame(y2007 = f2007))
 f2010 <- d2010 + f2007
 
+# for the plotting
+dpred <- data.frame(y2007 = f2007, d1 = d2010)
+gg_sc <- ggplot(ff, aes(x=y2007, y=d1)) +
+  geom_point(alpha = 0.1) +
+  stat_smooth(method = "lm") +
+  geom_point(data=dpred, color = "red", size = 3) +
+  labs(x = "Estimated area of fallow land in 2007 (in ha)",
+       y = "Changes in estimated fallow land area between 2010 and 2007 (in ha)")
+
+ggsave("figures/fig_prediction1.png", gg_sc)
+
 # put together in a df
 new_fallow <- data.frame(fallow_ha = c(f2007, f2010),
                          year = rep(c(2007, 2010), each = 20))
@@ -276,9 +287,20 @@ new_df <- data.frame(year_cat = factor(2007),
 mf2 <- lm(d2 ~ y2010, ff)
 
 # predictions for changes and new values
-f2010 <- seq(min(ff$y2010,na.rm=TRUE), max(ff$y2010,na.rm=TRUE), length.out = 20)
+f2010 <- seq(min(ff$y2010,na.rm=TRUE), 22, length.out = 20)
 d2016 <- predict(mf2, newdata = data.frame(y2010 = f2010))
 f2016 <- d2016 + f2010
+
+# for the plotting
+dpred <- data.frame(y2010 = f2010, d2 = d2016)
+gg_sc <- ggplot(ff, aes(x=y2010, y=d2)) +
+  geom_point(alpha = 0.1) +
+  stat_smooth(method = "lm") +
+  geom_point(data=dpred, color = "red", size = 3) +
+  labs(x = "Estimated area of fallow land in 2010 (in ha)",
+       y = "Changes in estimated fallow land area between 2016 and 2010 (in ha)")
+
+ggsave("figures/fig_prediction2.png", gg_sc)
 
 # put together in a df
 new_fallow <- data.frame(fallow_ha = c(f2010, f2016),
