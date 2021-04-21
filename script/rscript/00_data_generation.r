@@ -73,8 +73,8 @@ pro_atki <- function(data, col){
   data$type[data$obb == "Gewässer"] <- "water"
   data$type[data$obabez %in% c("Wald, Forst ", "Gehölz ")] <- "forest"
   data$type[data$obabez %in% c("Sumpf, Ried ", "Moor, Moos ")] <- "water"
-  data$type[data$obabez %in% c("Gartenland ", "Sonderkultur ", "Ackerland ")] <- "agriculture"
-  data$type[data$obabez %in% c("Grünland ", "Heide ")] <- "grassland"
+  data$type[data$obabez %in% c("Gartenland ", "Sonderkultur ", "Ackerland ", "Grünland ")] <- "agriculture"
+  data$type[data$obabez %in% c("Heide ")] <- "grassland"
   
   data %>%
     group_by(routcode, type) %>%
