@@ -10,7 +10,7 @@ library(sf)
 library(DHARMa)
 
 # load data
-bird <- read.csv("data/preprocessed/bird_fallow_v5.csv")
+bird <- read.csv("data/preprocessed/bird_fallow_v6.csv")
 #bird$land <- substr(bird$routcode, 1, 2)
 
 # some transformation
@@ -23,18 +23,17 @@ bird$forest_std <- scale(bird$forest)
 bird$agri_std <- scale(bird$agriculture)
 bird$bkr <- factor(bird$bkr)
 bird$intensity_std <- scale(bird$intensity)
+bird$x <- scales::rescale(bird$X_COORD, c(0, 1))
+bird$y <- scales::rescale(bird$Y_COORD, c(0, 1))
+
 
 # set the priors
 bprior <- c(prior(normal(0, 2.5), class = Intercept),
             prior(normal(0, 2.5), class = b),
             prior(student_t(3, 0, 2.5), class = sd),
             prior(gamma(0.01, 0.01), class = shape),
-            prior(beta(1, 1), class = zi))
+            prior(beta(1, 1), class = hu))
 
-bprior_low <- c(prior(normal(0, 2.5), class = Intercept),
-            prior(normal(0, 2.5), class = b),
-            prior(student_t(3, 0, 2.5), class = sd),
-            prior(gamma(0.01, 0.01), class = shape))
 
 bprior_rich <- c(prior(normal(0, 2.5), class = Intercept),
                 prior(normal(0, 2.5), class = b),
@@ -42,19 +41,19 @@ bprior_rich <- c(prior(normal(0, 2.5), class = Intercept),
                 prior(student_t(3, 0, 2.5), class = sigma))
 
 # the models
-m_edge <- brm(bf(edge ~ year_cat + edge_std * fallow_std + (1 | bkr)),
+m_edge <- brm(bf(edge ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
                 data = bird, prior = bprior,
-                family = "zero_inflated_negbinomial")
+                family = "hurdle_gamma")
 
-m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + gp(X_COORD, Y_COORD, k = 10, c = 5/4)),
-               data = bird, control = list(adapt_delta = 0.9),
-               family = "zero_inflated_negbinomial")
+m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + agri_std + (1 | bkr)),
+               data = bird, prior = bprior,
+               family = "hurdle_gamma")
 
-m_low <- brm(bf(low ~ year_cat + edge_std * fallow_std + (1 | bkr)),
-             data = bird, prior = bprior_low,
-             family = "negbinomial")
+m_low <- brm(bf(low ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
+             data = bird, prior = bprior,
+             family = "hurdle_gamma")
 
-m_rich <- brm(bf(rich | trunc(lb = 0) ~ year_cat + edge_std * fallow_std + (1 | bkr)),
+m_rich <- brm(bf(rich | trunc(lb = 0) ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
               data = bird, prior = bprior_rich,
               family = "normal")
 

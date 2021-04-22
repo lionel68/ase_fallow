@@ -19,7 +19,7 @@ names(mhb_xy)[1] <- tolower(names(mhb_xy)[1])
 bird %>%
   filter(! Artname %in% c("Rotmilan", "Rauchschwalbe")) %>% # remove red kite and barn swallow
   group_by(Artname) %>%
-  mutate(abundance_scale = round(scales::rescale(Abund, c(0, 100)), 0)) %>%
+  mutate(abundance_scale = scales::rescale(Abund, c(0, 100))) %>%
   ungroup() %>%
   left_join(bird_group) %>%
   group_by(routcode, Jahr, group) %>%
@@ -46,7 +46,7 @@ bird_dd <- full_join(bird_abu, bird_div,
                      by = c("routcode", "Jahr"))
 
 # fallow data
-fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallowatkis.csv")
+fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallowatkis_4101.csv")
 
 # bkr data
 bkr <- read.csv("data/landusedata/mhb_bkr.csv")
@@ -146,7 +146,7 @@ bird_dd2 %>%
   filter(prop_agri >= 0.1) -> bird_dd3
 
 # save this
-write.csv(bird_dd3, "data/preprocessed/bird_fallow_v5.csv",row.names = FALSE)
+write.csv(bird_dd3, "data/preprocessed/bird_fallow_v6.csv",row.names = FALSE)
 
 # now for species-level abundance
 # put together
