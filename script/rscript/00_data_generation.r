@@ -33,7 +33,7 @@ bird %>%
   group_by(routcode, Jahr, Artname) %>%
   summarise(Abundance = sum(Abund)) -> bird_abu2
 
-# compute species richness and shnnon div
+# compute species richness and shannon div
 bird %>%
   filter(! Artname %in% c("Rotmilan", "Rauchschwalbe")) %>%
   group_by(routcode, Jahr) %>%
@@ -46,25 +46,18 @@ bird_dd <- full_join(bird_abu, bird_div,
                      by = c("routcode", "Jahr"))
 
 # fallow data
-fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallow_4101_4102.csv")
+fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallowatkis_4101.csv")
 
 # bkr data
 bkr <- read.csv("data/landusedata/mhb_bkr.csv")
 
 # swf data 
-#swf <- read.csv("data/landusedata/mhb_1kmbuffer_swf.csv")
-# put together LWF and PWF
-# swf %>%
-#   group_by(routcode) %>%
-#   summarise(swf_sqm = sum(swf_sqm)) -> swf_dd
-# # edge length data
-# edge <- read.csv("data/landusedata/mhb_1kmbuffer_edge.csv")
-# edge length data combining ATKIS and SWF
 edge <- read.csv("data/landusedata/mhb_1kmbuffer_edge_atkisswf.csv")
 edge$edge_m[is.na(edge$edge_m)] <- 0 # replace NAs by 0
 
 # atkis data
 atkis <- read.csv("data/landusedata/mhb_1kmbuffer_atkis.csv")
+# dev, could be improved
 pro_atki <- function(data, col){
   
   #col2 <- enquo(col)
@@ -73,8 +66,8 @@ pro_atki <- function(data, col){
   data$type[data$obb == "Gewässer"] <- "water"
   data$type[data$obabez %in% c("Wald, Forst ", "Gehölz ")] <- "forest"
   data$type[data$obabez %in% c("Sumpf, Ried ", "Moor, Moos ")] <- "water"
-  data$type[data$obabez %in% c("Gartenland ", "Sonderkultur ", "Ackerland ", "Grünland ")] <- "agriculture"
-  data$type[data$obabez %in% c("Heide ")] <- "grassland"
+  data$type[data$obabez %in% c("Ackerland ", "Grünland ")] <- "agriculture"
+  data$type[data$obabez %in% c("Heide ", "Gartenland ", "Sonderkultur ", "Vegetationslose Fläche ")] <- "rest"
   
   data %>%
     group_by(routcode, type) %>%
@@ -93,39 +86,38 @@ atkis_dd %>%
               values_fill = 0) -> atkis_dd2
 
 # load the intensity data
-intensity <- read.csv("data/landusedata/intensity_costs.csv", sep = ";", dec =",")
-names(intensity)[1] <- "id"
-# remove 1% highest value for DAIR, GRAN, OGRL
-rem_99 <- function(x,p=0.99){
-  q99 <- quantile(x, probs = p)
-  x_out <- ifelse(x>q99, q99, x)
-  return(x_out)
-}
-# extend per usage
-intensity %>%
-  pivot_wider(id_cols = c(id, ha),
-              names_from = agg_verfahren,
-              values_from = kosten_pro_ha) %>%
-  mutate(across(3:7, ~ifelse(is.na(.x), 0, .x))) %>% # fill na rows with 0
-  mutate(across(5:7, ~rem_99(.x))) %>% # the 1% top values in DAIR, OGRL and GRAN are replaced
-  pivot_longer(3:7, names_to="type",
-               values_to = "cost_per_ha") %>%
-  mutate(cost = cost_per_ha * ha) %>% # re-compute cost
-  group_by(id) %>%
-  summarise(ges_kost_ha = sum(cost)) -> int_dd
-
-# this is sent to the db for the estimation based on ATKIS agricultural land
-write.csv(int_dd, "data/landusedata/intensity_total_cost.csv", row.names = FALSE)
-
-# load back
-intensity <- read.csv("data/landusedata/mhb_intensity_atkis.csv")
+# intensity <- read.csv("data/landusedata/intensity_costs.csv", sep = ";", dec =",")
+# names(intensity)[1] <- "id"
+# # remove 1% highest value for DAIR, GRAN, OGRL
+# rem_99 <- function(x,p=0.99){
+#   q99 <- quantile(x, probs = p)
+#   x_out <- ifelse(x>q99, q99, x)
+#   return(x_out)
+# }
+# # extend per usage
+# intensity %>%
+#   pivot_wider(id_cols = c(id, ha),
+#               names_from = agg_verfahren,
+#               values_from = kosten_pro_ha) %>%
+#   mutate(across(3:7, ~ifelse(is.na(.x), 0, .x))) %>% # fill na rows with 0
+#   mutate(across(5:7, ~rem_99(.x))) %>% # the 1% top values in DAIR, OGRL and GRAN are replaced
+#   pivot_longer(3:7, names_to="type",
+#                values_to = "cost_per_ha") %>%
+#   mutate(cost = cost_per_ha * ha) %>% # re-compute cost
+#   group_by(id) %>%
+#   summarise(ges_kost_ha = sum(cost)) -> int_dd
+# 
+# # this is sent to the db for the estimation based on ATKIS agricultural land
+# write.csv(int_dd, "data/landusedata/intensity_total_cost.csv", row.names = FALSE)
+# 
+# # load back
+# intensity <- read.csv("data/landusedata/mhb_intensity_atkis.csv")
 
 # put together
 bird_dd %>%
   rename(year = Jahr) %>%
   filter(year %in% c(2007, 2010, 2016)) %>%
   left_join(mhb_xy, by = "routcode") %>%
-  left_join(intensity, by = "routcode") %>%
   left_join(edge[,-1], by = "routcode") %>%
   left_join(atkis_dd2, by = "routcode") %>%
   left_join(fallow, by = c("routcode", "year")) %>%
@@ -141,12 +133,12 @@ bird_dd2$edge_m[is.na(bird_dd2$edge_m)] <- 0
 
 # remove plots with less than 10% agricultural area (ATKIS)
 bird_dd2 %>%
-  mutate(prop_agri = agriculture / (agriculture + forest + grassland + urban + water)) %>%
+  mutate(prop_agri = agriculture / (agriculture + forest + rest + urban + water)) %>%
   mutate(fallow_ha = fallow_ha * 1000) %>%
   filter(prop_agri >= 0.1) -> bird_dd3
 
 # save this
-write.csv(bird_dd3, "data/preprocessed/bird_fallow_v7.csv",row.names = FALSE)
+write.csv(bird_dd3, "data/preprocessed/bird_fallow_v8.csv",row.names = FALSE)
 
 # now for species-level abundance
 # put together

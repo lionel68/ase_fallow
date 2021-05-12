@@ -8,7 +8,7 @@ library(sf)
 library(brms)
 
 # load data
-bird <- read.csv("data/preprocessed/bird_fallow_v7.csv")
+bird <- read.csv("data/preprocessed/bird_fallow_v8.csv")
 #bird$land <- substr(bird$routcode, 1, 2)
 
 # some transformation
@@ -21,7 +21,7 @@ bird$forest_std <- scale(bird$forest)
 bird$bkr <- factor(bird$bkr)
 
 # load models
-m_list <- readRDS("model_output/fitted_model_new_hu.rds")
+m_list <- readRDS("model_output/fitted_model.rds")
 
 # plot the fallow land coefficients values
 # across different landscape complexity and
@@ -70,7 +70,7 @@ dd2 <- ggplot(df_param2, aes(x=type, y=Estimate, color = cpx, group = cpx)) +
        y = "Effect of fallow land")
 
 gg_dd <- ggpubr::ggarrange(dd1, dd2, nrow = 2, common.legend = TRUE, heights = c(2, 1))
-ggsave("figures/effect_fallow_land_hu.png", gg_dd)
+ggsave("figures/slope_fallow_land.png", gg_dd)
 
 
 # derive first model prediction along the gradient
@@ -95,7 +95,7 @@ plot_1_mu <- function(model, type = "field"){
   
   return(df_out)
 }
-
+# for the zero-outcome
 plot_1_hu <- function(model, type = "field"){
   df <- conditional_effects(model, effects = "fallow_std:edge_std", dpar = "hu")
   # put back the fallow area values in the orginal scale (ha)
@@ -136,7 +136,7 @@ gg_plot1 <- ggplot(pl1, aes(x=effect1__, y = estimate__, ymin = lower__, ymax = 
         axis.line = element_line())
 
 
-ggsave("figures/fallow_effect_abund_hu.png", gg_plot1)
+ggsave("figures/fallow_effect_abund.png", gg_plot1)
 
 # combine the groups
 pl1_hu <- rbind(plot_1_hu(m_list$field, "Field-breeding bird"),

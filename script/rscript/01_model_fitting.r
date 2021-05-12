@@ -10,7 +10,7 @@ library(sf)
 library(DHARMa)
 
 # load data
-bird <- read.csv("data/preprocessed/bird_fallow_v7.csv")
+bird <- read.csv("data/preprocessed/bird_fallow_v8.csv")
 #bird$land <- substr(bird$routcode, 1, 2)
 
 # some transformation
@@ -22,7 +22,6 @@ bird$urban_std <- scale(bird$urban)
 bird$forest_std <- scale(bird$forest)
 bird$agri_std <- scale(bird$agriculture)
 bird$bkr <- factor(bird$bkr)
-bird$intensity_std <- scale(bird$intensity)
 bird$x <- scales::rescale(bird$X_COORD, c(0, 1))
 bird$y <- scales::rescale(bird$Y_COORD, c(0, 1))
 
@@ -39,7 +38,7 @@ bprior_rich <- c(prior(normal(0, 2.5), class = Intercept),
                 prior(student_t(3, 0, 2.5), class = sd),
                 prior(student_t(3, 0, 2.5), class = sigma))
 
-# the models
+# the models with covariates
 m_edge <- brm(bf(edge ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr),
                  hu ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
                 data = bird, prior = bprior,
@@ -61,9 +60,8 @@ m_rich <- brm(bf(rich | trunc(lb = 0) ~ year_cat + agri_std + edge_std * fallow_
 
 # save the models
 m_list <- list(edge = m_edge, field = m_field, low = m_low, rich = m_rich)
-saveRDS(m_list, "model_output/fitted_model_new.rds")
-saveRDS(m_list, "model_output/fitted_model_new_wgrass.rds")
-saveRDS(m_list, "model_output/fitted_model_new_hu.rds")
+saveRDS(m_list, "model_output/fitted_model.rds")
+
 
 
 
