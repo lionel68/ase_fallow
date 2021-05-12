@@ -46,7 +46,7 @@ bird_dd <- full_join(bird_abu, bird_div,
                      by = c("routcode", "Jahr"))
 
 # fallow data
-fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallowatkis_4101.csv")
+fallow <- read.csv("data/landusedata/mhb_1kmbuffer_fallow_4101_4102.csv")
 
 # bkr data
 bkr <- read.csv("data/landusedata/mhb_bkr.csv")
@@ -146,7 +146,7 @@ bird_dd2 %>%
   filter(prop_agri >= 0.1) -> bird_dd3
 
 # save this
-write.csv(bird_dd3, "data/preprocessed/bird_fallow_v6.csv",row.names = FALSE)
+write.csv(bird_dd3, "data/preprocessed/bird_fallow_v7.csv",row.names = FALSE)
 
 # now for species-level abundance
 # put together

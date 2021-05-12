@@ -8,7 +8,7 @@ library(sf)
 library(brms)
 
 # load data
-bird <- read.csv("data/preprocessed/bird_fallow_v5.csv")
+bird <- read.csv("data/preprocessed/bird_fallow_v7.csv")
 #bird$land <- substr(bird$routcode, 1, 2)
 
 # some transformation
@@ -21,19 +21,21 @@ bird$forest_std <- scale(bird$forest)
 bird$bkr <- factor(bird$bkr)
 
 # load models
-m_list <- readRDS("model_output/fitted_model_new.rds")
+m_list <- readRDS("model_output/fitted_model_new_hu.rds")
 
 # plot the fallow land coefficients values
 # across different landscape complexity and
 # for the different responses
 plot_param <- function(model, type = "field"){
   tmp <- posterior_samples(model, pars = "fallow")
+  # effect for non-zeroes
   tmp2 <- cbind(tmp[,1] - tmp[,2], tmp[,1], tmp[,1] + tmp[,2])
   df_out <- as.data.frame(posterior_summary(tmp2, probs = c(0.025, 0.25, 0.75, 0.975)))
   
   df_out$type <- type
-  df_out$cpx <- factor(c("low", "medium", "high"), levels = c("high", "medium", "low"))
-
+  df_out$cpx <- factor(c("low", "medium", "high"), levels = c("low", "medium", "high"))
+  df_out$param <- "avg"
+ 
   return(df_out)
 }
 
@@ -41,17 +43,13 @@ df_param <- rbind(plot_param(m_list$field, "Field-breeding bird"),
                   plot_param(m_list$edge, "Edge-breeding bird"),
                   plot_param(m_list$low, "Non-fallow breeding bird"))
 
-df_param$X <- rep(1:3, each = 3) + rep(c(-0.075, 0, 0.075), 3)
 
-dd1 <- ggplot(df_param, aes(x=X, y=Estimate, color = cpx)) +
+dd1 <- ggplot(df_param, aes(x=type, y=Estimate, color = cpx, group = cpx)) +
   geom_hline(yintercept = 0, linetype = "dashed", size = 1.05) +
-  geom_linerange(aes(ymin = Q2.5, ymax = Q97.5), size = 0.5) +
-  geom_linerange(aes(ymin = Q25, ymax = Q75), size = 1.5, position = position_nudge(x = 0.001)) +
-  geom_point(size = 2.5) +
+  geom_linerange(aes(ymin = Q2.5, ymax = Q97.5), size = 0.5, position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = Q25, ymax = Q75), size = 1.5, position = position_dodge(width = 0.5)) +
+  geom_point(size = 2.5, position = position_dodge(width = 0.5)) +
   coord_flip() +
-  scale_x_continuous(breaks = 1:3, labels = c("Field-breeding\nbird",
-                                              "Edge-breeding\nbird",
-                                              "Non-fallow\nbreeding bird")) +
   scale_color_brewer(palette = "Accent",
                      name = "Structural complexity\nof the landscape : ") +
   labs(x = "",
@@ -59,22 +57,20 @@ dd1 <- ggplot(df_param, aes(x=X, y=Estimate, color = cpx)) +
   
 # richness
 df_param2 <- plot_param(m_list$rich, "Bird richness")
-df_param2$X <- c(-0.05, 0, 0.05)
 
-dd2 <- ggplot(df_param2, aes(x=X, y=Estimate, color = cpx)) +
+dd2 <- ggplot(df_param2, aes(x=type, y=Estimate, color = cpx, group = cpx)) +
   geom_hline(yintercept = 0, linetype = "dashed", size = 1.05) +
-  geom_linerange(aes(ymin = Q2.5, ymax = Q97.5), size = 0.5) +
-  geom_linerange(aes(ymin = Q25, ymax = Q75), size = 1.5, position = position_nudge(x = 0.001)) +
-  geom_point(size = 2.5) +
+  geom_linerange(aes(ymin = Q2.5, ymax = Q97.5), size = 0.5, position = position_dodge(width = 0.5)) +
+  geom_linerange(aes(ymin = Q25, ymax = Q75), size = 1.5, position = position_dodge(width = 0.5)) +
+  geom_point(size = 2.5, position = position_dodge(width = 0.5)) +
   coord_flip() +
-  scale_x_continuous(breaks = 0, labels = "Bird richness") +
   scale_color_brewer(palette = "Accent",
                      name = "Structural complexity\nof the landscape : ") +
   labs(x = "",
        y = "Effect of fallow land")
 
 gg_dd <- ggpubr::ggarrange(dd1, dd2, nrow = 2, common.legend = TRUE, heights = c(2, 1))
-ggsave("figures/effect_fallow_land.png", gg_dd)
+ggsave("figures/effect_fallow_land_hu.png", gg_dd)
 
 
 # derive first model prediction along the gradient
@@ -84,12 +80,13 @@ ggsave("figures/effect_fallow_land.png", gg_dd)
 # predictions are derived using the function brms::conditional_effects
 
 ## a helper function
-plot_1 <- function(model, type = "field"){
-  df <- conditional_effects(model, effects = "fallow_std:edge_std")
+plot_1_mu <- function(model, type = "field"){
+  df <- conditional_effects(model, effects = "fallow_std:edge_std", dpar = "mu")
   # put back the fallow area values in the orginal scale (ha)
   df[[1]]$effect1__ <- (df[[1]]$effect1__ * sd(bird$fallow_sqrt) + mean(bird$fallow_sqrt)) ** 2
   # turn the edge values into categories
-  df[[1]]$cpx <- factor(df[[1]]$effect2__, labels = c("high", "medium", "low"))
+  df[[1]]$cpx <- factor(df[[1]]$effect2__, labels = c("low", "medium", "high"),
+                        levels = c(-1, 0, 1))
   df[[1]]$type <- type
   # re-naming the response variable column
   names(df[[1]])[3] <- "resp"
@@ -98,10 +95,32 @@ plot_1 <- function(model, type = "field"){
   
   return(df_out)
 }
+
+plot_1_hu <- function(model, type = "field"){
+  df <- conditional_effects(model, effects = "fallow_std:edge_std", dpar = "hu")
+  # put back the fallow area values in the orginal scale (ha)
+  df[[1]]$effect1__ <- (df[[1]]$effect1__ * sd(bird$fallow_sqrt) + mean(bird$fallow_sqrt)) ** 2
+  # turn the edge values into categories
+  df[[1]]$cpx <- factor(df[[1]]$effect2__, labels = c("low", "medium", "high"),
+                        levels = c(-1, 0, 1))
+  df[[1]]$type <- type
+  # re-naming the response variable column
+  names(df[[1]])[3] <- "resp"
+  # turn into prob of presence
+  df[[1]]$estimate__ <- 1 - df[[1]]$estimate__
+  df[[1]]$lower__ <- 1 - df[[1]]$lower__
+  df[[1]]$upper__ <- 1 - df[[1]]$upper__
+  
+  
+  df_out <- arrange(df[[1]], cpx)
+  
+  return(df_out)
+}
+
 # combine the groups
-pl1 <- rbind(plot_1(m_list$field, "Field-breeding bird"),
-             plot_1(m_list$edge, "Edge-breeding bird"),
-             plot_1(m_list$low, "Non-fallow breeding bird"))
+pl1 <- rbind(plot_1_mu(m_list$field, "Field-breeding bird"),
+             plot_1_mu(m_list$edge, "Edge-breeding bird"),
+             plot_1_mu(m_list$low, "Non-fallow breeding bird"))
 # the plot
 gg_plot1 <- ggplot(pl1, aes(x=effect1__, y = estimate__, ymin = lower__, ymax = upper__)) +
   geom_ribbon(aes(fill = cpx), alpha = 0.2, color = NA) +
@@ -117,10 +136,31 @@ gg_plot1 <- ggplot(pl1, aes(x=effect1__, y = estimate__, ymin = lower__, ymax = 
         axis.line = element_line())
 
 
-ggsave("figures/fallow_effect_scaled_new.png", gg_plot1)
+ggsave("figures/fallow_effect_abund_hu.png", gg_plot1)
+
+# combine the groups
+pl1_hu <- rbind(plot_1_hu(m_list$field, "Field-breeding bird"),
+             plot_1_hu(m_list$edge, "Edge-breeding bird"),
+             plot_1_hu(m_list$low, "Non-fallow breeding bird"))
+# the plot
+gg_plot1_hu <- ggplot(pl1_hu, aes(x=effect1__, y = estimate__, ymin = lower__, ymax = upper__)) +
+  geom_ribbon(aes(fill = cpx), alpha = 0.2, color = NA) +
+  geom_line(aes(color = cpx)) +
+  facet_wrap(~ type) +
+  scale_color_brewer(palette = "Accent") +
+  scale_fill_brewer(palette = "Accent") +
+  guides(fill = guide_legend(title = "Structural complexity\nof the landscape : "),
+         color = guide_legend(title = "Structural complexity\nof the landscape : ")) +
+  labs(x = "Area of fallow in 1km buffer (ha)",
+       y = "Probability of presence (with 95% CrI)") +
+  theme(panel.background = element_blank(),
+        axis.line = element_line())
+
+
+ggsave("figures/fallow_effect_abund_hu2.png", gg_plot1_hu)
 
 # for species richness
-df_plot11 <- plot_1(m_list$rich, type = "Species richness")
+df_plot11 <- plot_1_mu(m_list$rich, type = "Species richness")
 
 gg_plot11 <- ggplot(df_plot11, aes(x=effect1__, y = estimate__, ymin = lower__, ymax = upper__)) +
   geom_ribbon(aes(fill = cpx), alpha = 0.2, color = NA) +
@@ -136,7 +176,7 @@ gg_plot11 <- ggplot(df_plot11, aes(x=effect1__, y = estimate__, ymin = lower__, 
 
 
 
-ggsave("figures/fallow_effect_rich.png", gg_plot11)
+ggsave("figures/fallow_effect_rich_wgrass.png", gg_plot11)
 
 ## third set of figures predicting abundance and richness
 ## for various amount of fallow land in different years
@@ -290,7 +330,7 @@ ggsave("figures/bird_changes_transition2.png", gg_2)
 
 # other version with both together
 gg_3 <- ggpubr::ggarrange(gg_1, gg_2, common.legend = TRUE, nrow = 2)
-ggsave("figures/bird_changes_together.png", gg_3)
+ggsave("figures/bird_changes_together_wgrass.png", gg_3)
 
 # now for richness
 df_plotr <- rbind(plot_2(m_list$rich, new_df, d2010, type = "Transition 1: abolishment\nof mandatory set-aside"),
@@ -315,7 +355,7 @@ gg_r <- ggplot(df_plotr, aes(x=delta_fallow, y=Estimate, ymin=Q2.5, ymax=Q97.5))
   theme(axis.line = element_line(),
         panel.background = element_blank())
 
-ggsave("figures/rich_changes_transition12.png", gg_r)
+ggsave("figures/rich_changes_transition_wgrass.png", gg_r)
 
 ##############
 # other results: post. proba of effect being stronger in the different groups

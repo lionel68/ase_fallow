@@ -10,7 +10,7 @@ library(sf)
 library(DHARMa)
 
 # load data
-bird <- read.csv("data/preprocessed/bird_fallow_v6.csv")
+bird <- read.csv("data/preprocessed/bird_fallow_v7.csv")
 #bird$land <- substr(bird$routcode, 1, 2)
 
 # some transformation
@@ -31,8 +31,7 @@ bird$y <- scales::rescale(bird$Y_COORD, c(0, 1))
 bprior <- c(prior(normal(0, 2.5), class = Intercept),
             prior(normal(0, 2.5), class = b),
             prior(student_t(3, 0, 2.5), class = sd),
-            prior(gamma(0.01, 0.01), class = shape),
-            prior(beta(1, 1), class = hu))
+            prior(gamma(0.01, 0.01), class = shape))
 
 
 bprior_rich <- c(prior(normal(0, 2.5), class = Intercept),
@@ -41,15 +40,18 @@ bprior_rich <- c(prior(normal(0, 2.5), class = Intercept),
                 prior(student_t(3, 0, 2.5), class = sigma))
 
 # the models
-m_edge <- brm(bf(edge ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
+m_edge <- brm(bf(edge ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr),
+                 hu ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
                 data = bird, prior = bprior,
                 family = "hurdle_gamma")
 
-m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + agri_std + (1 | bkr)),
+m_field <- brm(bf(field ~ year_cat + edge_std * fallow_std + agri_std + (1 | bkr),
+                  hu ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
                data = bird, prior = bprior,
                family = "hurdle_gamma")
 
-m_low <- brm(bf(low ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
+m_low <- brm(bf(low ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr),
+                hu ~ year_cat + agri_std + edge_std * fallow_std + (1 | bkr)),
              data = bird, prior = bprior,
              family = "hurdle_gamma")
 
@@ -60,6 +62,10 @@ m_rich <- brm(bf(rich | trunc(lb = 0) ~ year_cat + agri_std + edge_std * fallow_
 # save the models
 m_list <- list(edge = m_edge, field = m_field, low = m_low, rich = m_rich)
 saveRDS(m_list, "model_output/fitted_model_new.rds")
+saveRDS(m_list, "model_output/fitted_model_new_wgrass.rds")
+saveRDS(m_list, "model_output/fitted_model_new_hu.rds")
+
+
 
 # re-load the models
 m_list <- readRDS("model_output/fitted_model_new.rds")
