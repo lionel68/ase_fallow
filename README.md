@@ -14,3 +14,7 @@ This is the companion repository for the manuscript: Losses and gains of fallows
 	1. bird_data.csv: main dataset used for the analysis containing bird scaled abundance and richness together with the predictor variables
 	2. district_fallow.csv: district-level data (fallow land area ...)
 	3. district_shape.gpkg: district geometries
+
+## Questions / Issues
+
+For questions or issues either open an issue directly on the repo or contact lionel.hertzog[at]thuenen.de
