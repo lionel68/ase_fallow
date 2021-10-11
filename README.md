@@ -1,5 +1,6 @@
 # Losses and gains of fallows drive farmland bird populations over three funding periods of the EU Common Agricultural Policy
 [![DOI](https://zenodo.org/badge/410768453.svg)](https://zenodo.org/badge/latestdoi/410768453)
+
 This is the companion repository for the manuscript: Losses and gains of fallows drive farmland bird populations over three funding periods of the EU Common Agricultural Policy
 
 ## Structure of the repo
