@@ -23,7 +23,7 @@ bird$fallow_std <- scale(bird$fallow_sqrt)
 bird$edge_std <- scale(bird$edge_mha)
 bird$agri_std <- scale(bird$agriculture)
 
-group <- read.csv("data/bird_fallow_group.csv")
+group <- read.csv("data/bird_info.csv")
 
 # a species x year data.frame
 species_year <- expand.grid(species = unique(bird$species),
