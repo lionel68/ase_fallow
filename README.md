@@ -13,11 +13,11 @@ This is the companion repository for the manuscript: Associations between farmla
 	3. 03_ plotting_script.R: is the script that produces the figures shown in the main text of the manuscript
 	4. XX_helper_function.R: a file with helper functions used in the other scripts
 
-* data/ in this subfolder are different datasets, metadata information are given in the README of the data subfolder:
-	1. bird_data.csv: main dataset used for the analysis containing bird scaled abundance and richness together with the predictor variables
+* data/ in this subfolder are different datasets to reproduce the analysis, metadata information are given in the README of the data subfolder:
+	1. bird_rich.csv: dataset used for the analysis of bird richness together with the predictor variables
+	2. bird_abund.csv: dataset used for the species-level analysis of bird abundance together with the predictor variables
 	2. bird_info.csv: a dataset with species names and group info of the different bird species
-	3. district_fallow.csv: district-level data (fallow land area ...)
-	4. district_shape.gpkg: district geometries
+	4. district_fallow.gpkg: district geometries with fallow data
 
 ## Questions / Issues
 

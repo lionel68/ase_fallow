@@ -3,7 +3,7 @@
 fit_stan_abund <- function(data, resp_name, output_path, file_id){
   # the formula
   form <- paste0(resp_name, " ~ agri_std + edge_std * fallow_std +
-                         (1 | NUTS_code) + (0 + edge_std | NUTS_code)")
+                         (1 | NUTS_anon) + (0 + edge_std | NUTS_anon)")
   
   # the prior
   bprior <- c(prior(student_t(3, 0, 2.5), class = Intercept),
@@ -19,8 +19,8 @@ fit_stan_abund <- function(data, resp_name, output_path, file_id){
              control = list(adapt_delta = 0.9, max_treedepth = 25))
   # save the model
   saveRDS(mod, file = paste0(output_path, file_id, ".rds"))
-  gc()
-  rm(mod)
+  
+  return(mod)
 }
 
 # the same for species richness
@@ -28,8 +28,8 @@ fit_stan_rich <- function(data, resp_name, output_path, file_id){
   # the formula
   form <- paste0(resp_name, "| trunc(lb=0) ~ agri_std + fallow_std + edge_std + I(edge_std ** 2) +
                          fallow_std:edge_std + fallow_std:I(edge_std ** 2) +
-                         (1 | NUTS_code) + (0 + edge_std | NUTS_code) +
-                         (0 + I(edge_std ** 2) | NUTS_code)")
+                         (1 | NUTS_anon) + (0 + edge_std | NUTS_anon) +
+                         (0 + I(edge_std ** 2) | NUTS_anon)")
   
 bprior <- c(prior(student_t(3, 0, 2.5), class = Intercept),
                         prior(normal(0, 2.5), class = b),
@@ -67,18 +67,14 @@ stan_check <- function(model, data, colname, write_file = FALSE, file_id = "id")
   ks_test <- DHARMa::testUniformity(dd, plot = FALSE)$statistic
   # check dispersion
   dis_test <- DHARMa::testDispersion(dd, plot=FALSE)$p.value
-  # check spat autocorr
-  sp_test <- DHARMa::testSpatialAutocorrelation(dd, x = data$X_COORD,
-                                                y = data$Y_COORD, plot = FALSE)$statistic[1]
-  
+
   # put together to output
   out <- data.frame(id = file_id,
                     rhat = rhat_check,
                     ess = ess_check,
                     divergence = div_check,
                     ks = ks_test,
-                    disp = dis_test,
-                    spat = sp_test)
+                    disp = dis_test)
   
   # save this to file
   if(write_file){
@@ -107,12 +103,12 @@ extract_beta <- function(model, file_name, file_id){
                     beta_se = betas_se)
   
   # save this to file
-  if(file.exists(paste0("model_output/", file_name, ".csv"))){
-    write.table(out, file = paste0("model_output/", file_name, ".csv"),
+  if(file.exists(paste0("model_output/coef_species/", file_name, ".csv"))){
+    write.table(out, file = paste0("model_output/coef_species/", file_name, ".csv"),
                 append = TRUE, sep = ",",
                 row.names = FALSE, col.names = FALSE)
   } else {
-    write.table(out, file = paste0("model_output/", file_name, ".csv"),
+    write.table(out, file = paste0("model_output/coef_species/", file_name, ".csv"),
                 append = FALSE, sep = ",",
                 row.names = FALSE)
   }

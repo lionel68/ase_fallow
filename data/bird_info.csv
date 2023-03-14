@@ -1,25 +1,25 @@
-Species name;English name;Category;group
-Alauda arvensis;Eurasian Skylark;Field-breeders;field
-Anthus pratensis;Meadow Pipit;Field-breeders;field
-Coturnix coturnix;Common Quail;Field-breeders;field
-Motacilla flava;Western Yellow Wagtail;Field-breeders;field
-Vanellus vanellus;Northern Lapwing;Field-breeders;field
-Emberiza calandra;Corn Bunting;Edge-breeders;edge
-Emberiza citrinella;Yellowhammer;Edge-breeders;edge
-Emberiza hortulana;Ortolan Bunting;Edge-breeders;edge
-Phasianus colchicus;Common Pheasant;Edge-breeders;edge
-Perdix perdix;Grey Partridge;Edge-breeders;edge
-Saxicola rubetra;Whinchat;Edge-breeders;edge
-Saxicola rubicola;Common Stonechat;Edge-breeders;edge
-Anthus trivialis;Tree Pipit;Foraging visitors;low
-Lullula arborea;Woodlark;Foraging visitors;low
-Carduelis carduelis;European Goldfinch;Foraging visitors;low
-Lanius collurio;Red-backed Shrike;Foraging visitors;low
-Linaria cannabina;Common Linnet;Foraging visitors;low
-Motacilla alba;White Wagtail;Foraging visitors;low
-Passer montanus;Eurasian Tree Sparrow;Foraging visitors;low
-Streptopelia turtur;European Turtle-Dove;Foraging visitors;low
-Sturnus vulgaris;Common Starling;Foraging visitors;low
-Sylvia communis;Common Whitethroat;Foraging visitors;low
-Sylvia curruca;Lesser Whitethroat;Foraging visitors;low
-Turdus pilaris;Fieldfare;Foraging visitors;low
+"Species.name","English.name","Category","group"
+"Alauda_arvensis","Eurasian Skylark","Field-breeders","field"
+"Anthus_pratensis","Meadow Pipit","Field-breeders","field"
+"Coturnix_coturnix","Common Quail","Field-breeders","field"
+"Motacilla_flava","Western Yellow Wagtail","Field-breeders","field"
+"Vanellus_vanellus","Northern Lapwing","Field-breeders","field"
+"Emberiza_calandra","Corn Bunting","Edge-breeders","edge"
+"Emberiza_citrinella","Yellowhammer","Edge-breeders","edge"
+"Emberiza_hortulana","Ortolan Bunting","Edge-breeders","edge"
+"Phasianus_colchicus","Common Pheasant","Edge-breeders","edge"
+"Perdix_perdix","Grey Partridge","Edge-breeders","edge"
+"Saxicola_rubetra","Whinchat","Edge-breeders","edge"
+"Saxicola_rubicola","Common Stonechat","Edge-breeders","edge"
+"Anthus_trivialis","Tree Pipit","Foraging visitors","low"
+"Lullula_arborea","Woodlark","Foraging visitors","low"
+"Carduelis_carduelis","European Goldfinch","Foraging visitors","low"
+"Lanius_collurio","Red-backed Shrike","Foraging visitors","low"
+"Linaria_cannabina","Common Linnet","Foraging visitors","low"
+"Motacilla_alba","White Wagtail","Foraging visitors","low"
+"Passer_montanus","Eurasian Tree Sparrow","Foraging visitors","low"
+"Streptopelia_turtur","European Turtle-Dove","Foraging visitors","low"
+"Sturnus_vulgaris","Common Starling","Foraging visitors","low"
+"Sylvia_communis","Common Whitethroat","Foraging visitors","low"
+"Sylvia_curruca","Lesser Whitethroat","Foraging visitors","low"
+"Turdus_pilaris","Fieldfare","Foraging visitors","low"
