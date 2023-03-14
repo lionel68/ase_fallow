@@ -22,3 +22,7 @@ This is the companion repository for the manuscript: Associations between farmla
 ## Questions / Issues
 
 For questions or issues either open an issue directly on the repo or contact sebastian.klimek[at]thuenen.de
+
+## License
+
+The files in the data/ subfolder are shared under the [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license. The files in the script/ subfolder are shared under the [MIT](https://github.com/github/choosealicense.com/blob/gh-pages/LICENSE.md) license.
