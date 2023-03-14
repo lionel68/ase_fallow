@@ -3,7 +3,7 @@ message: "If you use this repository, please cite it as below."
 authors:
   - family-names: Hertzog
     given-names: Lionel
-title: "Companion repository for: Losses and gains of fallows drive farmland bird populations over three funding periods of the EU Common Agricultural Policy"
-version: 1.1
+title: "Associations between farmland bird and fallow area at large scales: consistently positive over three CAP periods but moderated by landscape complexity"
+version: 4.0
 doi: 10.5281/zenodo.5561413 
 date-released: 2021-10-11

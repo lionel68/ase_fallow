@@ -1,5 +1,5 @@
 
-# Losses and gains of fallows impact farmland bird populations over three funding periods of the EU Common Agricultural Policy
+# Associations between farmland bird and fallow area at large scales: consistently positive over three CAP periods but moderated by landscape complexity
 [![DOI](https://zenodo.org/badge/410768453.svg)](https://doi.org/10.5281/zenodo.7643282)
 
 
