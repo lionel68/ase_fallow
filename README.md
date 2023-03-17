@@ -1,6 +1,6 @@
 
 # Associations between farmland bird and fallow area at large scales: consistently positive over three CAP periods but moderated by landscape complexity
-[![DOI](https://zenodo.org/badge/410768453.svg)](https://doi.org/10.5281/zenodo.7643282)
+[![DOI](https://zenodo.org/badge/410768453.svg)](https://doi.org/10.5281/zenodo.5561412)
 
 
 This is the companion repository for the manuscript: Associations between farmland bird and fallow area at large scales: consistently positive over three CAP periods but moderated by landscape complexity
